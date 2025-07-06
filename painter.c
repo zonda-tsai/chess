@@ -9,6 +9,8 @@
 
 #ifdef _WIN32
 #include <conio.h>
+HANDLE hStdin_win;
+DWORD dwOriginalMode;
 #else
 #include <termios.h>
 struct termios orig_termios;
@@ -26,7 +28,7 @@ int n;
 #else
 	n = system("clear");
 #endif
-	if(!n) exit(1);
+	if(n) exit(1);
 }
 
 char get_key(){
