@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include <termios.h>
 #include <unistd.h>
 #include "chess_tool.h"
 #include "painter.h"
@@ -11,16 +10,16 @@ Moves_and_Functions get_state(rec* record, chess* temp, bool color, locat* from,
 	char c;
 	draw_state a = {0, -1, -1};
 	from->x = from->y = to->x = to->y = -1;
-	system("clear");
+	clear();
 	draw(*temp, color, a, record);
 	if(f == DRAW){
-		system("clear");
+		clear();
 		draw(*temp, color, a, record);
 		printf("Opponent wanna draw");
 		fflush(stdout);
-		while(read(STDIN_FILENO, &c, 1) == 1){
+		while((c = get_key()) != '\n' && c != '\r'){
 			if(c == 'D'){
-				system("clear");
+				clear();
 				draw(*temp, !color, a, record);
 				printf("Draw!");
 				fflush(stdout);
@@ -34,19 +33,19 @@ Moves_and_Functions get_state(rec* record, chess* temp, bool color, locat* from,
 	else if(isError(f))
 		draw_errors(f);
 	else if(undo){
-		system("clear");
+		clear();
 		draw(*temp, color, a, record);
 		printf("It's the beginning of game...");
 		fflush(stdout);
 	}
 	else if(redo){
-		system("clear");
+		clear();
 		draw(*temp, color, a, record);
 		printf("It's the end of stack...");
 		fflush(stdout);
 	}
 	a.state = 1;
-	while(read(STDIN_FILENO, &c, 1) == 1 && c != '\n'){
+	while((c = get_key()) != '\n' && c != '\r'){
 		if(c >= 'a' && c <= 'h')
 			from->y = (int)(c - 'a');
 		else if(c >= '1' && c <= '8')
@@ -60,7 +59,7 @@ Moves_and_Functions get_state(rec* record, chess* temp, bool color, locat* from,
 			exit(1);
 		}
 		else if(c == 'R'){
-			system("clear");
+			clear();
 			draw(*temp, !color, a, record);
 			info_input(22);
 			printf("%s", (color ? "White" : "Black"));
@@ -76,7 +75,7 @@ Moves_and_Functions get_state(rec* record, chess* temp, bool color, locat* from,
 			return DRAW;
 		}
 		else{
-			system("clear");
+			clear();
 			draw(*temp, color, a, record);
 			printf("Invalid input!");
 			fflush(stdout);
@@ -88,13 +87,13 @@ Moves_and_Functions get_state(rec* record, chess* temp, bool color, locat* from,
 			a.from = 9 + from->x;
 		else
 			a.from = 17 + from->x * 8 + from->y;
-		system("clear");
+		clear();
 		draw(*temp, color, a, record);
 	}
 	
-	system("clear");
+	clear();
 	draw(*temp, color, a, record);
-	while(read(STDIN_FILENO, &c, 1) == 1 && c != '\n'){
+	while((c = get_key()) != '\n' && c != '\r'){
 		if(c >= 'a' && c <= 'h')
 			to->y = (int)(c - 'a');
 		else if(c >= '1' && c <= '8')
@@ -110,7 +109,7 @@ Moves_and_Functions get_state(rec* record, chess* temp, bool color, locat* from,
 			exit(1);
 		}
 		else if(c == 'R'){
-			system("clear");
+			clear();
 			draw(*temp, !color, a, record);
 			info_input(22);
 			printf("%s", (color ? "White" : "Black"));
@@ -126,7 +125,7 @@ Moves_and_Functions get_state(rec* record, chess* temp, bool color, locat* from,
 			return DRAW;
 		}
 		else{
-			system("clear");
+			clear();
 			draw(*temp, color, a, record);
 			printf("Invalid input!");
 			fflush(stdout);
@@ -138,7 +137,7 @@ Moves_and_Functions get_state(rec* record, chess* temp, bool color, locat* from,
 			a.to = 9 + to->x;
 		else
 			a.to = 17 + to->x * 8 + to->y;
-		system("clear");
+		clear();
 		draw(*temp, color, a, record);
 	}
 
@@ -153,13 +152,13 @@ Moves_and_Functions get_state(rec* record, chess* temp, bool color, locat* from,
 
 void game(chess *a){
 	rec *current = NULL;
-	Moves_and_Functions type;
+	Moves_and_Functions type = NORMAL;
 	bool color = white, promote = 0, undo = 0, redo = 0, Draw = 0;
 	draw_state tmp = {0, -1, -1};
 	locat pos, des;
 	char piece;
 	while(1){
-		system("clear");
+		clear();
 		
 		type = get_state(current, a, color, &pos, &des, type, undo, redo);
 		if(Draw && type != DRAW){
@@ -212,7 +211,7 @@ void game(chess *a){
 			continue;
 
 		if(current != NULL && isCheckmated(current, a, !color)){
-			system("clear");
+			clear();
 			draw(*a, color, tmp, current);
 			info_input(22);
 			printf("[CHECKMATED]!");
@@ -225,7 +224,7 @@ void game(chess *a){
 			return;
 		}
 		else if(current != NULL && isStalemate(current, a, !color)){
-			system("clear");
+			clear();
 			draw(*a, color, tmp, current);
 			info_input(22);
 			printf("[STALEMATE]");
@@ -239,6 +238,7 @@ void game(chess *a){
 int main(){
 	enableGamingMode();
 	chess test = init();
+	all_clear();
 	printf(_cursor_hide);
 	game(&test);
 	printf("\x1b[32;0H");

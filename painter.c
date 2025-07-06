@@ -3,45 +3,86 @@
 #include <string.h>
 #include <stdbool.h>
 #include <unistd.h>
-#include <termios.h>
 #include "customise.h"
 #include "chess_tool.h"
 #include "painter.h"
 
+#ifdef _WIN32
+#include <conio.h>
+HANDLE hStdin_win;
+DWORD dwOriginalMode;
+#else
+#include <termios.h>
 struct termios orig_termios;
+#endif
+
+void clear(){
+	printf("\x1b[2j\x1b[H");
+	fflush(stdout);
+}
+
+void all_clear(){
+#ifdef _WIN32
+	system("cls");
+#else
+	system("clear");
+#endif
+}
+
+char get_key(){
+    char c;
+#ifdef _WIN32
+	DWORD readBytes = 0;
+	c = _getch();
+#else
+    read(STDIN_FILENO, &c, 1);
+#endif
+    return c;
+}
 
 void disableGamingMode(){
+#ifdef _WIN32
+	SetConsoleMode(hStdin_win, dwOriginalMode);
+#else
 	printf(_cursor_show);
 	fflush(stdout);
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
+#endif
 }
 
 void enableGamingMode(){
+#ifdef _WIN32
+    SetConsoleOutputCP(CP_UTF8);
+	win_term_init();
+    hStdin_win = GetStdHandle(STD_INPUT_HANDLE);
+    if (hStdin_win == INVALID_HANDLE_VALUE) exit(1);
+    if (!GetConsoleMode(hStdin_win, &dwOriginalMode)) exit(1);
+    DWORD dwNewMode = dwOriginalMode;
+	dwNewMode &= ~(ENABLE_ECHO_INPUT | ENABLE_LINE_INPUT | ENABLE_PROCESSED_INPUT);
+    if (!SetConsoleMode(hStdin_win, dwNewMode)) exit(1);
+#else
     // 取得當前的終端機設定
     tcgetattr(STDIN_FILENO, &orig_termios);
-    // 註冊還原函式，確保程式在任何情況下退出時都會執行它
-    atexit(disableGamingMode);
-
     // 複製一份設定，我們將在此基礎上修改
     struct termios raw = orig_termios;
-    
     // c_lflag (local flags) 是用來控制終端機的本地模式
     // &= ~ICANON : 關閉標準模式 (canonical mode)，不再需要按 Enter 觸發
     // &= ~ECHO   : 關閉回顯 (echo)，您按下的鍵不會自動顯示在螢幕上
     raw.c_lflag &= ~(ICANON | ECHO);
-    
     // 設定 read() 的行為
     raw.c_cc[VMIN] = 1;  // read() 至少要讀到 1 個位元組後才會返回
     raw.c_cc[VTIME] = 0; // 不設定讀取超時
-
     // 將修改後的新設定套用至終端機
     // TCSAFLUSH 表示在套用新設定前，會先清空終端機的輸入緩衝區
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
+#endif
+    // 註冊還原函式，確保程式在任何情況下退出時都會執行它
+	atexit(disableGamingMode);
 }
 
 bool draw_errors(Moves_and_Functions a){
 	if(!isError(a)) return 0;
-	
+	info_input(22);
 	switch(a){
 	case ILLEGAL_INPUT:
 		printf("Invalid input...");
@@ -86,6 +127,7 @@ bool draw_errors(Moves_and_Functions a){
 	default:
 		return 0;
 	}
+	fflush(stdout);
 	return 1;
 }
 
@@ -165,6 +207,8 @@ void draw_infos(bool color, rec *current){
 	printf(_b_blue "%s" _b_blue "'s TURN" _end, (color) ? "\x1b[107m[WHITE]\x1b[0m" : "\x1b[100m[BLACK]\x1b[0m");
 	int i, j = 10;
 	rec *record = current;
+	for(i = 0 ; i < 6 ; i++)
+			info_input(10 + i);
 	if(record != NULL && record->prev != NULL){
 		for(i = 0 ; i < 10 - color ; i++){
 			if(record->prev->prev == NULL)
@@ -172,14 +216,16 @@ void draw_infos(bool color, rec *current){
 			record = record->prev;
 		}
 		while(record != current->next){
-			printf(_b_lightwhite);
 			info_input(j);
+			printf(_b_lightwhite);
 			printf("%-10s", record->not);
 			printf(_end);
+			fflush(stdout);
 			record = record->next;
 			if(record == current->next)
 				break;
-			printf("\x1b[%d;58H", j++);
+			printf("\x1b[%d;58H\x1b[K\x1b[%d;58H", j, j);
+			j++;
 			printf(_b_lightblack);
 			printf("%-10s", record->not);
 			printf(_end);
@@ -309,7 +355,7 @@ Moves_and_Functions promotion(chess *temp, locat pos){
 	
 	char answer = 0, c;
 	draw_promotion(0);
-	while(read(STDIN_FILENO, &c, 1) == 1 && c != '\n'){
+	while((c = get_key()) != '\n' && c != '\r'){
 		if(c < '1' || c > '4'){
 			printf("Invalid input");
 			draw_promotion(0);

@@ -13,10 +13,13 @@
 #define threat_bg_white _b_RGB(stdout, 214, 71, 71)
 #define white_pieces _RGB(stdout, 255, 255, 255)
 #define black_pieces _RGB(stdout, 0, 0, 0)
-#define info_input(x) printf("\x1b[%d;48H", x)
+#define info_input(x) printf("\x1b[%d;48H\x1b[K\x1b[%d;48H", x, x)
 
 extern struct termios orig_termios;
 
+void clear();
+void all_clear();
+char get_key();
 void disableGamingMode();
 void enableGamingMode();
 void draw_pieces(char);

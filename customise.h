@@ -6,23 +6,24 @@ extern "C" {
 #endif
 
 #ifdef _WIN32
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0A00
+#endif
 #include <windows.h>
 #endif
-
-static inline void win_term_init() {
+	
+#ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
+#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+#endif
+	
+static inline void win_term_init(){
 #ifdef _WIN32
 	HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-	if (hOut == INVALID_HANDLE_VALUE) {
-		return;
-	}
+	if (hOut == INVALID_HANDLE_VALUE) return;
 	DWORD dwMode = 0;
-	if (!GetConsoleMode(hOut, &dwMode)) {
-		return;
-	}
+	if (!GetConsoleMode(hOut, &dwMode)) return;
 	dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
-	if (!SetConsoleMode(hOut, dwMode)) {
-		return;
-	}
+	if (!SetConsoleMode(hOut, dwMode)) return;
 #endif
 }
 
