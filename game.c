@@ -6,9 +6,10 @@
 #include "chess_tool.h"
 #include "painter.h"
 
-Moves_and_Functions get_state(rec* record, chess* temp, bool color, locat* from, locat* to, Moves_and_Functions f, bool undo, bool redo){
+Moves_and_Functions get_state(rec** recording, chess* temp, bool color, locat* from, locat* to, Moves_and_Functions f, bool undo, bool redo){
 	char c;
 	draw_state a = {0, -1, -1};
+	rec *record = *recording;
 	from->x = from->y = to->x = to->y = -1;
 	clear();
 	draw(*temp, color, a, record);
@@ -24,6 +25,7 @@ Moves_and_Functions get_state(rec* record, chess* temp, bool color, locat* from,
 				printf("Draw!");
 				fflush(stdout);
 				printf("\x1b[32;0H");
+				clean_record(recording);
 				exit(0);
 			}
 			else
@@ -56,7 +58,8 @@ Moves_and_Functions get_state(rec* record, chess* temp, bool color, locat* from,
 			return REDO;
 		else if(c == 'q'){
 			printf("\x1b[32;0H");
-			exit(1);
+			clean_record(recording);
+			exit(0);
 		}
 		else if(c == 'R'){
 			clear();
@@ -68,7 +71,8 @@ Moves_and_Functions get_state(rec* record, chess* temp, bool color, locat* from,
 			printf("[%s] wins!", (color ? "Black" : "White"));
 			printf("\x1b[32;0H");
 			fflush(stdout);
-			exit(1);
+			clean_record(recording);
+			exit(0);
 		}
 		else if(c == 'D'){
 			info_input(22);
@@ -99,14 +103,15 @@ Moves_and_Functions get_state(rec* record, chess* temp, bool color, locat* from,
 		else if(c >= '1' && c <= '8')
 			to->x = 7 - (int)(c - '1');
 		else if(c == 'C')
-			return get_state(record, temp, color, from, to, f, undo, redo);
+			return get_state(recording, temp, color, from, to, f, undo, redo);
 		else if(c == 'u')
 			return UNDO;
 		else if(c == 'r')
 			return REDO;
 		else if(c == 'q'){
 			printf("\x1b[32;0H");
-			exit(1);
+			clean_record(recording);
+			exit(0);
 		}
 		else if(c == 'R'){
 			clear();
@@ -118,7 +123,8 @@ Moves_and_Functions get_state(rec* record, chess* temp, bool color, locat* from,
 			printf("[%s] wins!", (color ? "Black" : "White"));
 			printf("\x1b[32;0H");
 			fflush(stdout);
-			exit(1);
+			clean_record(recording);
+			exit(0);
 		}
 		else if(c == 'D'){
 			info_input(22);
@@ -160,7 +166,7 @@ void game(chess *a){
 	while(1){
 		clear();
 		
-		type = get_state(current, a, color, &pos, &des, type, undo, redo);
+		type = get_state(&current, a, color, &pos, &des, type, undo, redo);
 		if(Draw && type != DRAW){
 			color = !color;
 			Draw = 0;

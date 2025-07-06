@@ -9,8 +9,6 @@
 
 #ifdef _WIN32
 #include <conio.h>
-HANDLE hStdin_win;
-DWORD dwOriginalMode;
 #else
 #include <termios.h>
 struct termios orig_termios;
@@ -22,20 +20,22 @@ void clear(){
 }
 
 void all_clear(){
+int n;
 #ifdef _WIN32
-	system("cls");
+	n = system("cls");
 #else
-	system("clear");
+	n = system("clear");
 #endif
+	if(!n) exit(1);
 }
 
 char get_key(){
     char c;
 #ifdef _WIN32
-	DWORD readBytes = 0;
 	c = _getch();
 #else
-    read(STDIN_FILENO, &c, 1);
+    ssize_t n = read(STDIN_FILENO, &c, 1);
+	if(n <= 0) exit(1);
 #endif
     return c;
 }
@@ -196,37 +196,39 @@ void draw_infos(bool color, rec *current){
 	info_input(2);
 	printf("  and ensured by [Enter]");
 	info_input(3);
-	printf("- 'u' for undo, 'r' for redo");
+	printf("- '" _yellow "u" _end "' for undo, '" _yellow "r" _end "' for redo");
 	info_input(4);
-	printf("- 'C' for reset hangling point");
+	printf("- '" _yellow "C" _end "' for reset anchor point");
 	info_input(5);
-	printf("- 'R' for resign, 'D' for draw");
+	printf("- '" _yellow "R" _end "' for resign, '" _yellow "D" _end "' for draw");
 	info_input(6);
-	printf("- 'q' to quit the game, *DON'T USE [CTRL][C]*");
+	printf("- '" _yellow "q" _end "' to quit the game, *" _red "DON'T USE [CTRL][C]" _end "*");
 	info_input(8);
-	printf(_b_blue "%s" _b_blue "'s TURN" _end, (color) ? "\x1b[107m[WHITE]\x1b[0m" : "\x1b[100m[BLACK]\x1b[0m");
+	printf("%s" "'s TURN" _end, (color) ? "\x1b[37m[WHITE]\x1b[0m" : "\x1b[90m[BLACK]\x1b[0m");
 	int i, j = 10;
 	rec *record = current;
 	for(i = 0 ; i < 6 ; i++)
 			info_input(10 + i);
 	if(record != NULL && record->prev != NULL){
-		for(i = 0 ; i < 10 - color ; i++){
+		for(i = 0 ; i < 8 - color ; i++){
 			if(record->prev->prev == NULL)
 				break;
 			record = record->prev;
 		}
 		while(record != current->next){
 			info_input(j);
-			printf(_b_lightwhite);
+			printf("%-3d", (step - (i -= 2)) / 2);
+			printf(_b_lightwhite _blue);
 			printf("%-10s", record->not);
 			printf(_end);
 			fflush(stdout);
 			record = record->next;
 			if(record == current->next)
 				break;
-			printf("\x1b[%d;58H\x1b[K\x1b[%d;58H", j, j);
+			printf("\x1b[%d;61H\x1b[K\x1b[%d;61H", j, j);
 			j++;
 			printf(_b_lightblack);
+			_RGB(stdout, 174, 183, 233);
 			printf("%-10s", record->not);
 			printf(_end);
 			record = record->next;
@@ -279,7 +281,7 @@ void draw(chess temp, int a, draw_state type, rec *current){
 				printf("  ");
 				bg_black;
 			}
-			draw_chess(temp.w_die[i], 0);
+			draw_chess(temp.b_die[i], 0);
 		}
 	else
 		for(i = 0 ; i < 16 ; i++){
@@ -288,7 +290,7 @@ void draw(chess temp, int a, draw_state type, rec *current){
 				printf("  ");
 				bg_black;
 			}
-			draw_chess(temp.b_die[i], 0);
+			draw_chess(temp.w_die[i], 0);
 		}
 	printf(_end "\n");
 	
@@ -329,7 +331,7 @@ void draw(chess temp, int a, draw_state type, rec *current){
 				printf("  ");
 				bg_black;
 			}
-			draw_chess(temp.b_die[i], 0);
+			draw_chess(temp.w_die[i], 0);
 		}
 	else
 		for(i = 0 ; i < 16 ; i++){
@@ -338,7 +340,7 @@ void draw(chess temp, int a, draw_state type, rec *current){
 				printf("  ");
 				bg_black;
 			}
-			draw_chess(temp.w_die[i], 0);
+			draw_chess(temp.b_die[i], 0);
 		}
 
 	

@@ -721,7 +721,7 @@ bool threefold_rule(rec *current, chess *temp){
 
 bool insufficient_piece(chess *temp){
 	int i, j, bk = 0, wk = 0, bn = 0, wn = 0, bb = 0, wb = 0, a, b;
-	locat pos;
+	locat pos = {-1, -1};
 	char piece;
 	for(i = 0 ; i < 8 ; i++)
 		for(j = 0 ; j < 8 ; j++){
@@ -758,6 +758,8 @@ Moves_and_Functions isLegal_move(rec *current, chess *temp, locat pos, locat des
 	if(!isLegal_locat(pos) || !isLegal_locat(des)) return POSITION;
 	char piece = fetch(temp, pos);
 	bool color = isWhite(piece);
+	if(isEmpty(piece))
+		return EMPTY_POSITION;
 	if((c ^ color))
 		return COLOUR;
 	if(!isEmpty(fetch(temp, des)) && (isWhite(piece) ^ isBlack(fetch(temp, des))))
