@@ -1,4 +1,4 @@
-# Chess game on terminal (Ubuntu)
+# Chess game on terminal
 
 *If this program couldn't work, please tell me*
 
