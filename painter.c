@@ -379,3 +379,26 @@ Moves_and_Functions promotion(chess *temp, locat pos){
 	}
 	return ILLEGAL_PROMOTION;
 }
+
+void draw_all_history(rec *current, int n){
+	if(current == NULL)
+		return;
+	if(n == 0){
+		printf("\n\n[HISTORY]\n\n");
+		return;
+	}
+	draw_all_history(current->prev, n - 1);
+	if(n & 1)
+		printf("%-3d", (n + 1) / 2);
+	if(n & 1)
+		white_pieces;
+	else
+		_RGB(stdout, 204, 204, 204);
+	printf("\x1b[7m %-10s" _end, current->not);
+	if(!(n & 1))
+		printf("\n");
+	if(n == 0)
+		printf("\n");
+	if(n == step)
+		printf("\n\n");
+}

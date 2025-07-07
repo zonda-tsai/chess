@@ -30,5 +30,6 @@ void draw_infos(bool, rec*);
 void draw_promotion(int);
 void draw(chess, int, draw_state, rec*);
 Moves_and_Functions promotion(chess*, locat);
+void draw_all_history(rec*, int);
 
 #endif

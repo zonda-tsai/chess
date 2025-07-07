@@ -23,8 +23,9 @@ Moves_and_Functions get_state(rec** recording, chess* temp, bool color, locat* f
 				clear();
 				draw(*temp, !color, a, record);
 				printf("Draw!");
-				fflush(stdout);
 				printf("\x1b[32;0H");
+				fflush(stdout);
+				draw_all_history(*recording, step);
 				clean_record(recording);
 				exit(0);
 			}
@@ -58,6 +59,8 @@ Moves_and_Functions get_state(rec** recording, chess* temp, bool color, locat* f
 			return REDO;
 		else if(c == 'q'){
 			printf("\x1b[32;0H");
+			fflush(stdout);
+			draw_all_history(*recording, step);
 			clean_record(recording);
 			exit(0);
 		}
@@ -71,6 +74,7 @@ Moves_and_Functions get_state(rec** recording, chess* temp, bool color, locat* f
 			printf("[%s] wins!", (color ? "Black" : "White"));
 			printf("\x1b[32;0H");
 			fflush(stdout);
+			draw_all_history(*recording, step);
 			clean_record(recording);
 			exit(0);
 		}
@@ -110,6 +114,8 @@ Moves_and_Functions get_state(rec** recording, chess* temp, bool color, locat* f
 			return REDO;
 		else if(c == 'q'){
 			printf("\x1b[32;0H");
+			fflush(stdout);
+			draw_all_history(*recording, step);
 			clean_record(recording);
 			exit(0);
 		}
@@ -123,6 +129,7 @@ Moves_and_Functions get_state(rec** recording, chess* temp, bool color, locat* f
 			printf("[%s] wins!", (color ? "Black" : "White"));
 			printf("\x1b[32;0H");
 			fflush(stdout);
+			draw_all_history(*recording, step);
 			clean_record(recording);
 			exit(0);
 		}
@@ -226,6 +233,9 @@ void game(chess *a){
 				printf("White wins!");
 			else
 				printf("Black wins!");
+			printf("\x1b[32;0H");
+			fflush(stdout);
+			draw_all_history(current, step);
 			clean_record(&current);
 			return;
 		}
@@ -234,6 +244,9 @@ void game(chess *a){
 			draw(*a, color, tmp, current);
 			info_input(22);
 			printf("[STALEMATE]");
+			printf("\x1b[32;0H");
+			fflush(stdout);
+			draw_all_history(current, step);
 			clean_record(&current);
 			return;
 		}
