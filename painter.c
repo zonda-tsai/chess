@@ -220,18 +220,17 @@ void draw_infos(bool color, rec *current){
 		while(record != current->next){
 			info_input(j);
 			printf("%-3d", (step - (i -= 2)) / 2);
-			printf(_b_lightwhite _blue);
-			printf("%-10s", record->not);
+			white_pieces;
+			printf("\x1b[7m %-10s", record->not);
 			printf(_end);
 			fflush(stdout);
 			record = record->next;
 			if(record == current->next)
 				break;
-			printf("\x1b[%d;61H\x1b[K\x1b[%d;61H", j, j);
+			printf("\x1b[%d;62H\x1b[K\x1b[%d;62H", j, j);
 			j++;
-			printf(_b_lightblack);
-			_RGB(stdout, 174, 183, 233);
-			printf("%-10s", record->not);
+			_RGB(stdout, 204, 204, 204);
+			printf("\x1b[7m %-10s", record->not);
 			printf(_end);
 			record = record->next;
 		}
