@@ -2,10 +2,15 @@
 
 *If this program couldn't work, please tell me*
 
+*This might looks weird on terminal => Download the font 'Meslo Nerd Fonts' for better apperance.*
+
+*# this url will directly download Meslo Nerd Font: [MESLO NERD FONTS](https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/Meslo.zip)*
+
 ---
 
 ## Requirements
 ### Windows
+  - *Windows 11 can show unicodes better*
   - MinGW
       + installed from [MSYS2](https://www.msys2.org/)
 ### Linux
