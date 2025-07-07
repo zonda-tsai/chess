@@ -6,8 +6,8 @@
 
 ## Requirements
 ### Windows
-  - MinGW64 / MinGW32
-      + installed from https://www.mingw-w64.org/
+  - MinGW
+      + installed from [MSYS2](https://www.msys2.org/)
 ### Linux
   - gcc
       + installed by `sudo apt install build-essential` / `sudo dnf groupinstall "Development Tools"` / `sudo yum groupinstall "Development Tools"` / `sudo pacman -S gcc`
