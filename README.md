@@ -30,7 +30,10 @@
   - `u`: undo
   - `r`: redo
   - `q`: quit the game
+  - `?`: display help (any input to end)
   - `C`: reset the initial point
+  - `T`: text mode on/off e.g. pawn -> P, queen -> Q, etc.
+  - ` `: refresh the screen
   - `R`: resign
   - `D`: draw
 
