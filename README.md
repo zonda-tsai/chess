@@ -12,7 +12,7 @@
 ### Windows
   - *Windows 11 can show unicodes better*
   - MinGW
-      + installed from [MSYS2](https://www.msys2.org/)
+      + installed from [MSYS2](https://www.msys2.org/) or [w64devkit](https://github.com/skeeto/w64devkit/releases/tag/v2.3.0)
 ### Linux
   - gcc
       + installed by `sudo apt install build-essential` / `sudo dnf groupinstall "Development Tools"` / `sudo yum groupinstall "Development Tools"` / `sudo pacman -S gcc`
