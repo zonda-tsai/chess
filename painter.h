@@ -16,6 +16,7 @@
 #define info_input(x) printf("\x1b[%d;48H\x1b[K\x1b[%d;48H", x, x)
 
 extern struct termios orig_termios;
+extern bool chess_piece;
 
 void clear();
 void all_clear();
@@ -27,6 +28,7 @@ bool draw_errors(Moves_and_Functions);
 void draw_chess(char, bool);
 void draw_background(draw_state, int, int);
 void draw_infos(bool, rec*);
+void draw_help();
 void draw_promotion(int);
 void draw(chess, int, draw_state, rec*);
 Moves_and_Functions promotion(chess*, locat);

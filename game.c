@@ -10,6 +10,7 @@ Moves_and_Functions get_state(rec** recording, chess* temp, bool color, locat* f
 	char c;
 	draw_state a = {0, -1, -1};
 	rec *record = *recording;
+	int i;
 	from->x = from->y = to->x = to->y = -1;
 	clear();
 	draw(*temp, color, a, record);
@@ -53,6 +54,23 @@ Moves_and_Functions get_state(rec** recording, chess* temp, bool color, locat* f
 			from->y = (int)(c - 'a');
 		else if(c >= '1' && c <= '8')
 			from->x = 7 - (int)(c - '1');
+		else if(c == 'T'){
+			chess_piece = !chess_piece;
+			return get_state(recording, temp, color, from, to, f, undo, redo);
+		}
+		else if(c == '?'){
+			for(i = 0 ; i < 21 ; i++)
+				info_input(i + 1);
+			draw_help();
+			c = getchar();
+			for(i = 0 ; i < 9 ; i++)
+				info_input(i + 1);
+			return get_state(recording, temp, color, from, to, f, undo, redo);
+		}
+		else if(c == ' '){
+			all_clear();
+			return get_state(recording, temp, color, from, to, f, undo, redo);
+		}
 		else if(c == 'u')
 			return UNDO;
 		else if(c == 'r')
@@ -112,6 +130,24 @@ Moves_and_Functions get_state(rec** recording, chess* temp, bool color, locat* f
 			return UNDO;
 		else if(c == 'r')
 			return REDO;
+		else if(c == ' '){
+			all_clear();
+			return get_state(recording, temp, color, from, to, f, undo, redo);
+		}
+		else if(c == 'T'){
+			all_clear();
+			chess_piece = !chess_piece;
+			return get_state(recording, temp, color, from, to, f, undo, redo);
+		}
+		else if(c == '?'){
+			for(i = 0 ; i < 21 ; i++)
+				info_input(i + 1);
+			draw_help();
+			c = getchar();
+			for(i = 0 ; i < 9 ; i++)
+				info_input(i + 1);
+			return get_state(recording, temp, color, from, to, f, undo, redo);
+		}
 		else if(c == 'q'){
 			printf("\x1b[32;0H");
 			fflush(stdout);

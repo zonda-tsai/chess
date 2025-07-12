@@ -16,6 +16,8 @@ DWORD dwOriginalMode;
 struct termios orig_termios;
 #endif
 
+bool chess_piece = 1;
+
 void clear(){
 	printf("\x1b[2j\x1b[H");
 	fflush(stdout);
@@ -36,7 +38,7 @@ char get_key(){
 #ifdef _WIN32
 	c = _getch();
 #else
-    ssize_t n = read(STDIN_FILENO, &c, 1);
+	ssize_t n = read(STDIN_FILENO, &c, 1);
 	if(n <= 0) exit(1);
 #endif
     return c;
@@ -139,21 +141,39 @@ void draw_chess(char a, bool color){
 		black_pieces;
 	else if(isWhite(a) && color)
 		white_pieces;
-	
-	if(isRook(a))
-		printf(_black_rook);
-	else if(isKnight(a))
-		printf(_black_knight);
-	else if(isBishop(a))
-		printf(_black_bishop);
-	else if(isQueen(a))
-		printf(_black_queen);
-	else if(isKing(a))
-		printf(_black_king);
-	else if(isPawn(a))
-		printf(_black_pawn);
-	else
-		printf(" ");
+	if(chess_piece){
+		if(isRook(a))
+			printf(_black_rook);
+		else if(isKnight(a))
+			printf(_black_knight);
+		else if(isBishop(a))
+			printf(_black_bishop);
+		else if(isQueen(a))
+			printf(_black_queen);
+		else if(isKing(a))
+			printf(_black_king);
+		else if(isPawn(a))
+			printf(_black_pawn);
+		else
+			printf(" ");
+	}
+	else{
+		if(isRook(a))
+			printf("R");
+		else if(isKnight(a))
+			printf("N");
+		else if(isBishop(a))
+			printf("B");
+		else if(isQueen(a))
+			printf("Q");
+		else if(isKing(a))
+			printf("K");
+		else if(isPawn(a))
+			printf("P");
+		else
+			printf(" ");
+
+	}
 	printf("  ");
 }
 
@@ -191,28 +211,38 @@ void draw_background(draw_state type, int i, int j){
 	}
 }
 
-void draw_infos(bool color, rec *current){
-	fflush(stdout);
+void draw_help(){
 	info_input(1);
-	printf("- setting position (x, y) by coordinate");
+	printf("- setting chess position by 2 characters:");
 	info_input(2);
-	printf("  and ensured by [Enter]");
+	printf("    e.g. the location e2 needs 'e' and '2'");
 	info_input(3);
-	printf("- '" _yellow "u" _end "' for undo, '" _yellow "r" _end "' for redo");
+	printf("  confirming by [Enter]");
 	info_input(4);
 	printf("- '" _yellow "C" _end "' for reset anchor point");
 	info_input(5);
-	printf("- '" _yellow "R" _end "' for resign, '" _yellow "D" _end "' for draw");
+	printf("- '" _yellow "T" _end "' is for text mode chess");
 	info_input(6);
-	printf("- '" _yellow "q" _end "' to quit the game, *" _red "DON'T USE [CTRL][C]" _end "*");
+	printf("- '" _yellow "R" _end "' for resign, '" _yellow "D" _end "' for draw");
+	info_input(7);
+	printf("- '" _yellow "u" _end "' for undo, '" _yellow "r" _end "' for redo");
 	info_input(8);
+	printf("- " _yellow "[Space]" _end " is for refreshing screen");
+	info_input(9);
+	printf("- '" _yellow "q" _end "' to quit the game, " _red "DON'T USE [CTRL][C]" _end);
+	fflush(stdout);
+}
+
+void draw_infos(bool color, rec *current){
+	fflush(stdout);
+	info_input(4);
 	printf("%s" "'s TURN" _end, (color) ? "\x1b[37m[WHITE]\x1b[0m" : "\x1b[90m[BLACK]\x1b[0m");
-	int i, j = 10;
+	int i, j = 6;
 	rec *record = current;
-	for(i = 0 ; i < 6 ; i++)
-			info_input(10 + i);
+	for(i = 0 ; i < 10 ; i++)
+			info_input(j + i);
 	if(record != NULL && record->prev != NULL){
-		for(i = 0 ; i < 8 - color ; i++){
+		for(i = 0 ; i < 18 - color ; i++){
 			if(record->prev->prev == NULL)
 				break;
 			record = record->prev;
@@ -367,6 +397,12 @@ Moves_and_Functions promotion(chess *temp, locat pos){
 		draw_promotion(c - '0');
 		answer = c;
 	}
+	info_input(18);
+	info_input(19);
+	info_input(20);
+	info_input(21);
+	info_input(22);
+	fflush(stdout);
 	switch(answer){
 	case '1':
 		return PROMOTION_Q;
@@ -384,6 +420,7 @@ void draw_all_history(rec *current, int n){
 	if(current == NULL)
 		return;
 	if(n == 0){
+		fflush(stdout);
 		printf("\n\n[HISTORY]\n\n");
 		return;
 	}
