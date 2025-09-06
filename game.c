@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include "chess_tool.h"
+#include "AI.h"
 #include "painter.h"
 
 Moves_and_Functions get_state(rec** recording, chess* temp, bool color, locat* from, locat* to, Moves_and_Functions f, bool undo, bool redo){
@@ -28,6 +29,7 @@ Moves_and_Functions get_state(rec** recording, chess* temp, bool color, locat* f
 				fflush(stdout);
 				draw_all_history(*recording, step);
 				clean_record(recording);
+				c = get_key();
 				exit(0);
 			}
 			else
@@ -62,7 +64,7 @@ Moves_and_Functions get_state(rec** recording, chess* temp, bool color, locat* f
 			for(i = 0 ; i < 21 ; i++)
 				info_input(i + 1);
 			draw_help();
-			c = getchar();
+			c = get_key();
 			for(i = 0 ; i < 9 ; i++)
 				info_input(i + 1);
 			return get_state(recording, temp, color, from, to, f, undo, redo);
@@ -80,6 +82,7 @@ Moves_and_Functions get_state(rec** recording, chess* temp, bool color, locat* f
 			fflush(stdout);
 			draw_all_history(*recording, step);
 			clean_record(recording);
+			c = get_key();
 			exit(0);
 		}
 		else if(c == 'R'){
@@ -94,6 +97,7 @@ Moves_and_Functions get_state(rec** recording, chess* temp, bool color, locat* f
 			fflush(stdout);
 			draw_all_history(*recording, step);
 			clean_record(recording);
+			c = get_key();
 			exit(0);
 		}
 		else if(c == 'D'){
@@ -143,7 +147,7 @@ Moves_and_Functions get_state(rec** recording, chess* temp, bool color, locat* f
 			for(i = 0 ; i < 21 ; i++)
 				info_input(i + 1);
 			draw_help();
-			c = getchar();
+			c = get_key();
 			for(i = 0 ; i < 9 ; i++)
 				info_input(i + 1);
 			return get_state(recording, temp, color, from, to, f, undo, redo);
@@ -296,6 +300,6 @@ int main(){
 	all_clear();
 	printf(_cursor_hide);
 	game(&test);
-	printf("\x1b[32;0H");
+	printf("\n");
 	return 0;
 }

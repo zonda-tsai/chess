@@ -99,7 +99,10 @@ void push_record(rec **current, chess *temp, locat pos, locat des, Moves_and_Fun
 	new->to = des;
 	new->next = NULL;
 	new->moving = type;
-	new->eaten = fetch(temp, des);
+	if(type == EN_PASSANT)
+		new->eaten = fetch(temp, get(pos.x, des.y));
+	else
+		new->eaten = fetch(temp, des);
 	(*current)->next = new;
 	*current = new;
 	step++;
@@ -565,8 +568,9 @@ Moves_and_Functions pawn(chess *temp, locat pos, locat des, const rec* current){
 	if(!isLegal_locat(pos) || !isLegal_locat(des) || is_same_loc(pos, des)) return POSITION;
 	char piece = fetch(temp, pos);
 	char enemy = fetch(temp, des);
-		
+
 	if(!isPawn(piece)) return EMPTY_POSITION;
+	if(!isEmpty(enemy) && (isWhite(piece) ^ isBlack(enemy))) return ILLEGAL_ROUTE;
 	
 	int delta = isWhite(piece) * -1 + isBlack(piece);
 	int initial_position = isWhite(piece) * 6 + isBlack(piece) * 1;
@@ -603,9 +607,10 @@ Moves_and_Functions bishop(chess *temp, locat pos, locat des){
 	locat vec = {2 * (des.x - pos.x > 0) - 1, 2 * (des.y - pos.y > 0) - 1};
 	int i, j;
 	for(i = pos.x + vec.x, j = pos.y + vec.y ; !is_same_loc(get(i, j), des); i += vec.x, j += vec.y)
-		if(!isEmpty(fetch(temp, get(i, j))) && (isWhite(fetch(temp, pos)) ^ isBlack(fetch(temp, get(i, j)))))
+		if(!isEmpty(fetch(temp, get(i, j))))
 			return BLOCKED;
-	
+	if(!isEmpty(fetch(temp, des)) && (isWhite(fetch(temp, pos)) ^ isBlack(fetch(temp, des))))
+		return ILLEGAL_ROUTE;
 	return NORMAL;
 }
 
@@ -613,6 +618,8 @@ Moves_and_Functions knight(chess *temp, locat pos, locat des){
 	if(!isLegal_locat(pos) || !isLegal_locat(des) || !isKnight(fetch(temp, pos)) || is_same_loc(pos, des)) return POSITION;
 	locat delta = {des.x - pos.x, des.y - pos.y};
 	if(delta.x * delta.x + delta.y * delta.y != 5) return ILLEGAL_ROUTE;
+	if(!isEmpty(fetch(temp, des)) && (isWhite(fetch(temp, pos)) ^ isBlack(fetch(temp, des))))
+		return ILLEGAL_ROUTE;
 	return NORMAL;
 }
 
@@ -620,7 +627,7 @@ Moves_and_Functions rook(chess *temp, locat pos, locat des){
 	if(!isLegal_locat(pos) || !isLegal_locat(des) || !isRook(fetch(temp, pos)) || is_same_loc(pos, des)) return POSITION;
 
 	if((des.x - pos.x) * (des.y - pos.y) != 0) return ILLEGAL_ROUTE;
-	int i, delta = 2 * ((des.x - pos.x) + (des.y - pos.y) > 0) - 1;
+	int i, delta = 2 * (((des.x - pos.x) + (des.y - pos.y)) > 0) - 1;
 	if(des.x == pos.x){
 		for(i = pos.y + delta ; i != des.y ; i += delta)
 			if(!isEmpty(fetch(temp, get(des.x, i))))
@@ -631,7 +638,9 @@ Moves_and_Functions rook(chess *temp, locat pos, locat des){
 			if(!isEmpty(fetch(temp, get(i, des.y))))
 				return BLOCKED;
 	}
-	
+	if(!isEmpty(fetch(temp, des)) && (isWhite(fetch(temp, pos)) ^ isBlack(fetch(temp, des))))
+		return ILLEGAL_ROUTE;
+
 	return NORMAL;
 }
 
@@ -644,7 +653,8 @@ Moves_and_Functions queen(chess *temp, locat pos, locat des){
 		locat vec = {2 * (des.x - pos.x > 0) - 1, 2 * (des.y - pos.y > 0) - 1};
 		for(i = pos.x + vec.x, j = pos.y + vec.y ; !is_same_loc(get(i, j), des); i += vec.x, j += vec.y)
 			if(!isEmpty(fetch(temp, get(i, j)))) return BLOCKED;
-		
+		if(!isEmpty(fetch(temp, des)) && (isWhite(fetch(temp, pos)) ^ isBlack(fetch(temp, des))))
+			return ILLEGAL_ROUTE;
 		return NORMAL;
 	}
 	else if(Rook && !Bishop){
@@ -659,7 +669,8 @@ Moves_and_Functions queen(chess *temp, locat pos, locat des){
 				if(!isEmpty(fetch(temp, get(i, des.y))))
 					return BLOCKED;
 		}
-		
+		if(!isEmpty(fetch(temp, des)) && (isWhite(fetch(temp, pos)) ^ isBlack(fetch(temp, des))))
+			return ILLEGAL_ROUTE;
 		return NORMAL;
 	}
 	return ILLEGAL_ROUTE;
@@ -760,7 +771,7 @@ Moves_and_Functions isLegal_move(rec *current, chess *temp, locat pos, locat des
 	bool color = isWhite(piece);
 	if(isEmpty(piece))
 		return EMPTY_POSITION;
-	if((c ^ color))
+	if(c ^ color)
 		return COLOUR;
 	if(!isEmpty(fetch(temp, des)) && (isWhite(piece) ^ isBlack(fetch(temp, des))))
 		return ILLEGAL;
